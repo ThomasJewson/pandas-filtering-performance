@@ -1,10 +1,9 @@
-# %%
 from timeit import default_timer as timer
 import numpy as np
 import pandas as pd
 
 
-def generate_random_data(width, length, **kwargs):
+def generate_random_data(width, length):
     cats = pd.DataFrame(
         np.random.choice(["foo", "bar", "baz"], size=(length, width)),
         columns=["cat_" + str(idx) for idx in range(width)],
@@ -31,18 +30,3 @@ def run_time(func):
         return {func.__name__: times}
 
     return wrapper
-
-
-@run_time
-def countdown(n, *, num_of_reps: int = 1):
-    while n > 0:
-        n -= 1
-
-
-@run_time
-def basic_filter(df, *, num_of_reps: int = 1):
-    df[(df["cat_0"] == "bar") & (df["num_0"] < 0.5)]
-
-
-df = generate_random_data(2, 100)
-basic_filter(df, num_of_reps=10)
