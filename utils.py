@@ -30,3 +30,22 @@ def run_time(func):
         return {func.__name__: times}
 
     return wrapper
+
+
+def convert_to_df(_func_times: dict) -> pd.DataFrame:
+    def remove_dict(cell: dict):
+        try:
+            return list(cell.values())[0]
+        except AttributeError:
+            return
+
+    def get_cols_from_keys(cell: dict):
+        try:  # EAFP
+            return list(cell.keys())[0]
+        except AttributeError:
+            return
+
+    _df = pd.DataFrame().from_records(_func_times).T
+    first_row = _df.iloc[0]
+    _df.columns = first_row.apply(get_cols_from_keys).to_list()
+    return _df.applymap(remove_dict)
