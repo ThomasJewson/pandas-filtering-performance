@@ -3,7 +3,16 @@ import numpy as np
 import pandas as pd
 
 
-def generate_random_data(width, length):
+def generate_random_data(width: int, length: int) -> pd.DataFrame:
+    """Generates DataFrame determined width and length of categorical and numeric values.
+
+    Args:
+        width (int): Width of DataFrame. EG: Number of categorical and numeric column
+        length (int): Length of DataFrame.
+
+    Returns:
+        pd.DataFrame: Number of columns 2 * width due to categorical and numeric columns.
+    """
     cats = pd.DataFrame(
         np.random.choice(["foo", "bar", "baz"], size=(length, width)),
         columns=["cat_" + str(idx) for idx in range(width)],
@@ -16,6 +25,8 @@ def generate_random_data(width, length):
 
 
 def run_time(func):
+    """Decorator which calculates the run time of a given function."""
+
     def wrapper(*args, **kwargs):
         if "num_of_reps" not in kwargs:
             kwargs["num_of_reps"] = 1
@@ -33,8 +44,17 @@ def run_time(func):
 
 
 def convert_to_df(_func_times: dict) -> pd.DataFrame:
+    """Converts dictionary of function run times to a DataFrame
+
+    Args:
+        _func_times (dict): Output from calc_run_times function
+
+    Returns:
+        pd.DataFrame:
+    """
+
     def remove_dict(cell: dict):
-        try:
+        try: # EAFP
             return list(cell.values())[0]
         except AttributeError:
             return
