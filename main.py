@@ -64,8 +64,8 @@ def calc_run_times(Filters, max_length_of_test_data, step, num_of_repetitions):
 
 
 class Config:
-    MAX_LENGTH = 10_000_000
-    STEP = 5_000_000
+    MAX_LENGTH = 1_000_000_000
+    STEP = 250_000_000
     NUM_OF_REPS = 5
 
 
@@ -80,13 +80,21 @@ def main():
         .melt(id_vars="index")
         .explode("value")
         .reset_index(drop=True)
+        .rename(columns={"value": "Time (s)", "index": "Length of DataFrame"})
     )
 
     entries.to_csv(
         f"output/entries_{str(Config.NUM_OF_REPS)}_{str(int(Config.MAX_LENGTH/Config.STEP))}_{str(Config.MAX_LENGTH)}.csv"
     )
 
-    sns.lineplot(x="index", y="value", style="variable", hue="variable", data=entries)
+    sns.set_style("darkgrid")
+    sns.lineplot(
+        x="Length of DataFrame",
+        y="Time (s)",
+        style="variable",
+        hue="variable",
+        data=entries,
+    )
 
 
 if __name__ == "__main__":
