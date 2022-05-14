@@ -1,4 +1,5 @@
 # %%
+from timeit import timeit
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -30,6 +31,9 @@ LONG_LOC = R"output\entries_20_4_100000000.csv"
 SHORT_LOC = R"output\entries_50_50_100000.csv"
 VERY_SHORT_LOC = R"output\entries_25_33_100000.csv"
 # %%
+get_agg(LONG_LOC).loc[["loc","mask_values_loc"]]
+
+#%%
 line_graph(get_agg(LONG_LOC))
 # %%
 line_graph(get_agg(SHORT_LOC))
@@ -76,3 +80,28 @@ get_agg(SHORT_LOC).reset_index().query("`Length of DataFrame` == @_length")
 # %%
 _length = 99000
 get_agg(VERY_SHORT_LOC).reset_index().query("`Length of DataFrame` == @_length")
+
+# %%
+from utils import generate_random_data
+
+df = generate_random_data(1,1_000_000)
+df
+# %%
+%%timeit
+df.loc[(df["cat_0"] == "bar") & (df["num_0"] < 0.5)]
+# %%
+%%timeit
+df[(df["cat_0"] == "bar") & (df["num_0"] < 0.5)]
+# %%
+%%timeit
+mask = (df["cat_0"].values == "bar") & (df["num_0"].values < 0.5)
+df[mask]
+# %%
+%%timeit
+df[(df["cat_0"].values == "bar") & (df["num_0"].values < 0.5)]
+# %%
+%%timeit
+df.loc[np.where((df["cat_0"].values == "bar") & (df["num_0"].values < 0.5))]
+# %%
+%%timeit
+df.query("`cat_0` == 'bar' and `num_0` < 0.5")

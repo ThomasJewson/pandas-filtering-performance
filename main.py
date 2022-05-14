@@ -33,6 +33,10 @@ class Filters:
         df.loc[mask]
 
     @run_time
+    def standard_values(df: pd.DataFrame, *, num_of_reps: int = 1):
+        df.loc[(df["cat_0"].values == "bar") & (df["num_0"].values < 0.5)]
+
+    @run_time
     def where(df: pd.DataFrame, *, num_of_reps: int = 1):
         df.loc[np.where((df["cat_0"] == "bar") & (df["num_0"] < 0.5))]
 
@@ -44,6 +48,16 @@ class Filters:
     def values_where(df: pd.DataFrame, *, num_of_reps: int = 1):
         df.loc[np.where((df["cat_0"].values == "bar") & (df["num_0"].values < 0.5))]
 
+    @run_time
+    def values_where_mask(df: pd.DataFrame, *, num_of_reps: int = 1):
+        mask = np.where((df["cat_0"].values == "bar") & (df["num_0"].values < 0.5))
+        df.loc[mask]
+
+    @run_time
+    def mask_values(df: pd.DataFrame, *, num_of_reps: int = 1):
+        mask = (df["cat_0"].values == "bar") & (df["num_0"].values < 0.5)
+        df[mask]
+
 
 def calc_run_times(Filters, max_length_of_test_data, step, num_of_repetitions):
     _func_times = {}
@@ -51,12 +65,8 @@ def calc_run_times(Filters, max_length_of_test_data, step, num_of_repetitions):
         df = generate_random_data(2, length)
         _func_times[length] = [
             Filters.standard(df, num_of_reps=num_of_repetitions),
-            Filters.loc(df, num_of_reps=num_of_repetitions),
-            Filters.mask(df, num_of_reps=num_of_repetitions),
-            Filters.mask_loc(df, num_of_reps=num_of_repetitions),
-            Filters.mask_values_loc(df, num_of_reps=num_of_repetitions),
+            Filters.standard_values(df, num_of_reps=num_of_repetitions),
             Filters.query(df, num_of_reps=num_of_repetitions),
-            Filters.where(df, num_of_reps=num_of_repetitions),
             Filters.values_where(df, num_of_reps=num_of_repetitions),
         ]
 
@@ -64,9 +74,9 @@ def calc_run_times(Filters, max_length_of_test_data, step, num_of_repetitions):
 
 
 class Config:
-    MAX_LENGTH = 1_000_000_000
-    STEP = 250_000_000
-    NUM_OF_REPS = 5
+    MAX_LENGTH = 100_000_000
+    STEP = 10_000_000
+    NUM_OF_REPS = 10
 
 
 def main():
