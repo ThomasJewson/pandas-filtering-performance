@@ -1,4 +1,3 @@
-# %%
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -74,9 +73,9 @@ def calc_run_times(Filters, max_length_of_test_data, step, num_of_repetitions):
 
 
 class Config:
-    MAX_LENGTH = 100_000_000
-    STEP = 10_000_000
-    NUM_OF_REPS = 10
+    MAX_LENGTH = 250_000
+    STEP = 10_000
+    NUM_OF_REPS = 120
 
 
 def main():

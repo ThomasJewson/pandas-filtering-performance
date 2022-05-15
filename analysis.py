@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from utils import generate_random_data
 
 
 def get_agg(filepath: str) -> pd.DataFrame:
@@ -25,83 +26,64 @@ def line_graph(_df_agg: pd.DataFrame):
         hue="variable",
         data=_df_agg.reset_index(),
     )
-
-
-LONG_LOC = R"output\entries_20_4_100000000.csv"
-SHORT_LOC = R"output\entries_50_50_100000.csv"
-VERY_SHORT_LOC = R"output\entries_25_33_100000.csv"
-# %%
-get_agg(LONG_LOC).loc[["loc","mask_values_loc"]]
-
-#%%
-line_graph(get_agg(LONG_LOC))
-# %%
-line_graph(get_agg(SHORT_LOC))
-
-# %%
-get_agg(SHORT_LOC)
-# %%
-sns.lmplot(
-    x="Length of DataFrame",
-    y="Time (s) mean",
-    hue="variable",
-    scatter_kws={"s": 1},
-    data=get_agg(SHORT_LOC).reset_index(),
-)
-# %%
-line_graph(get_agg(LONG_LOC))
-# %%
-get_agg(LONG_LOC)
-# where + where and values
-# Standard + loc + mask + mask & values
-# Query
-"""
-Adding a mask to standard filtering (as a variable) speeds things up
-
-Adding .loc sometimes speeds things up a bit. 
-    Faster without a mask
-    Slower with a mask
-
-Mask values is the fastest, but it is the most cumbersome
-
-For a small performance cost, you can use np.where as the filtering method
-alonside values, this just a little slower than mask_values
-
-Query is relativily slow on smaller data and it is around 20_000 when you 
-should start using it. Bonus, is that it is very readable
-
-
-
-"""
-get_agg(LONG_LOC)
-# %%
-_length = 2000
-get_agg(SHORT_LOC).reset_index().query("`Length of DataFrame` == @_length")
-# %%
-_length = 99000
-get_agg(VERY_SHORT_LOC).reset_index().query("`Length of DataFrame` == @_length")
-
-# %%
-from utils import generate_random_data
-
+# %% Generating random data
 df = generate_random_data(1,1_000_000)
 df
-# %%
+# %% Standard with Loc
 %%timeit
 df.loc[(df["cat_0"] == "bar") & (df["num_0"] < 0.5)]
-# %%
+# %% Standard
 %%timeit
 df[(df["cat_0"] == "bar") & (df["num_0"] < 0.5)]
-# %%
+# %% Standard with mask
 %%timeit
 mask = (df["cat_0"].values == "bar") & (df["num_0"].values < 0.5)
 df[mask]
-# %%
+# %% Standard with values
 %%timeit
 df[(df["cat_0"].values == "bar") & (df["num_0"].values < 0.5)]
-# %%
+# %% numpy.where with values
 %%timeit
 df.loc[np.where((df["cat_0"].values == "bar") & (df["num_0"].values < 0.5))]
-# %%
+# %% Query
 %%timeit
 df.query("`cat_0` == 'bar' and `num_0` < 0.5")
+
+# %%
+# Files to use:
+# output\entries_20_10_100000000.csv
+# output\entries_120_25_250000.csv
+import matplotlib.style as style
+
+long = pd.read_csv(R"output\entries_20_10_100000000.csv", index_col="Unnamed: 0")
+short = pd.read_csv(R"output\entries_120_25_250000.csv", index_col="Unnamed: 0")
+style.use('seaborn-poster') #sets the size of the charts
+style.use('ggplot')
+
+def change_names(inp_str):
+    if inp_str == "values_where":
+        return "np.where"
+    if inp_str == "query":
+        return ".query"
+    if inp_str == "standard_values":
+        return "standard with .values"
+    return inp_str
+
+short["variable"] = short["variable"].apply(change_names)
+long["variable"] = long["variable"].apply(change_names)
+
+sns.lineplot(
+    x="Length of DataFrame",
+    y="Time (s)",
+    style="variable",
+    hue="variable",
+    data=long,
+)
+# %%
+sns.lineplot(
+    x="Length of DataFrame",
+    y="Time (s)",
+    style="variable",
+    hue="variable",
+    data=short,
+)
